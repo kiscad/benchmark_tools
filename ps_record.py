@@ -1,16 +1,17 @@
 import subprocess
-import psutil
 import time
-import pandas as pd
-import matplotlib.pyplot as plt
 from typing import List
 
+import pandas as pd
+import psutil
+
 binfile = "count_tc"
-tgt_dir = "/home/chen/projects/rust/" 
+tgt_dir = "/home/chen/projects/rust/"
 
 
 cmd_str = (f"/home/chen/projects/code_stats/target/debug/{binfile} "
            f"-t rs -t c -f {tgt_dir}")
+
 
 def start_process(cmd_str):
     subprocess.run(
@@ -22,8 +23,9 @@ def start_process(cmd_str):
         stdout=subprocess.PIPE)
     return proc
 
+
 def bench_once(cmd_str):
-    HIST_INTERVAL = 0.1 # seconds
+    HIST_INTERVAL = 0.1  # seconds
     process = start_process(cmd_str)
     proc = psutil.Process(process.pid)
 
@@ -43,7 +45,8 @@ def bench_once(cmd_str):
     (out_data, _) = process.communicate()
     totaltime = out_data.splitlines()[1].split(":")[1].strip()[:-1]
 
-    hist_df = pd.DataFrame(history, columns=['time-secs', 'mem-percent', 'cpu-percent', 'threads-num', 'file-descs'])
+    hist_df = pd.DataFrame(history, columns=[
+                           'time-secs', 'mem-percent', 'cpu-percent', 'threads-num', 'file-descs'])
     summary = {
         "total-time": totaltime,
         "cpu%-mean": hist_df['cpu-percent'].mean(),
@@ -79,4 +82,3 @@ if __name__ == "__main__":
     pd.DataFrame(summaries).to_csv("bench-summary.csv", index=False)
     for bfile, df in hist_dfs.items():
         df.to_csv(f"{bfile}.csv", index=False)
-
