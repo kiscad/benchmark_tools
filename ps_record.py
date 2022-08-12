@@ -55,13 +55,14 @@ def bench_once(cmd_str):
 
 
 def bench_binaries(binaries: List[str]):
-    summaries = dict()
+    summaries = []
     hist_dfs = dict()
     for binary in binaries:
         cmd_str = (f"/home/chen/projects/code_stats/target/release/{binary} "
                    f"-t rs -t c -f {tgt_dir}")
         summary, hist = bench_once(cmd_str)
-        summaries[binary] = summary
+        summary['binary'] = binary
+        summaries.append(summary)
         hist_dfs[binary] = hist
     return summaries, hist_dfs
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
 
     binaries = ['count_tc', 'count_notc']
     summaries, hist_dfs = bench_binaries(binaries)
-    print(summaries)
+    pd.DataFrame(summaries).to_csv("bench-summary.csv", index=False)
     for bfile, df in hist_dfs.items():
         df.to_csv(f"{bfile}.csv", index=False)
+
